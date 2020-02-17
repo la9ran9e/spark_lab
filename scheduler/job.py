@@ -35,6 +35,6 @@ class Job:
         await asyncio.gather(*tasks, loop=self.loop)
 
     async def _do_run(self, task: Task):
+        await task.run()
         for dep_task in task.downstream():
             await dep_task.run()
-        await task.run()
