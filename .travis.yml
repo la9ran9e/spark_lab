@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r requirements.dev.txt
+
+script:
+  - py.test --cov=scheduler tests
+
+after_success:
+  - codecov

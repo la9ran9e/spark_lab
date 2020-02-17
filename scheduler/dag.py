@@ -1,14 +1,23 @@
+class CyclicDependenceError(Exception):
+    ...
+
+
 class DAG:
     def __init__(self):
         self.graph = dict()
 
     def add_node(self, node):
-        assert node not in self.graph, f"{node!r} already exists"
+        if node in self.graph:
+            raise KeyError(f"{node!r} already exists")
         self.graph[node] = set()
 
     def add_edge(self, ind_node, dep_node):
-        assert ind_node in self.graph, f"{ind_node!r} not exists"
-        assert dep_node in self.graph, f"{dep_node!r} not exists"
+        if ind_node not in self.graph:
+            raise KeyError(f"{ind_node!r} not exists")
+        if dep_node not in self.graph:
+            raise KeyError(f"{dep_node!r} not exists")
+        if ind_node in self.downstream(dep_node):
+            raise CyclicDependenceError()
         self.graph[ind_node].add(dep_node)
 
     def travers(self):
