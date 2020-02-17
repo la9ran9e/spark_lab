@@ -66,3 +66,27 @@ async def test_add_duplicated_task_id(job, event_loop):
     Task(foo, "task_id", job, loop=event_loop)
     with pytest.raises(KeyError):
         Task(bar, "task_id", job, loop=event_loop)
+
+
+@pytest.mark.asyncio
+async def test_get_independent(job, event_loop):
+    assert job.get_independent() == set()
+
+    foo_task = Task(foo, "foo_task", job, loop=event_loop)
+    bar_task = Task(bar, "bar_task", job, loop=event_loop)
+    baz_task = Task(baz, "baz_task", job, loop=event_loop)
+    foobar_task = Task(foobar, "foobar", job, loop=event_loop)
+
+    assert job.get_independent() == {foo_task, bar_task, baz_task, foobar_task}
+
+    bar_task.set_upstream(foo_task)
+    assert job.get_independent() == {bar_task, baz_task, foobar_task}
+
+    baz_task.set_upstream(foo_task)
+    assert job.get_independent() == {bar_task, baz_task, foobar_task}
+
+    foo_task.set_upstream(foobar_task)
+    assert job.get_independent() == {bar_task, baz_task}
+
+    baz_task.set_upstream(bar_task)
+    assert job.get_independent() == {baz_task}
