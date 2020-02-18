@@ -1,12 +1,9 @@
-import asyncio
-
 from .task import Task
 from .dag import DAG
 
 
 class Job:
-    def __init__(self, loop=None):
-        self.loop = loop or asyncio.get_event_loop()
+    def __init__(self):
         self.tasks = dict()
         self.dag = DAG()
 
@@ -25,16 +22,11 @@ class Job:
         independent = self.dag.get_independent()
         return set(t for t in self.tasks.values() if t.id in independent)
 
-    async def run(self):
+    def run(self):
         print(self.dag.graph)
-        tasks = []
-
-        for task in self.get_independent():
-            tasks.append(self._do_run(task))
-
-        await asyncio.gather(*tasks, loop=self.loop)
-
-    async def _do_run(self, task: Task):
-        await task.run()
-        for dep_task in task.downstream():
-            await dep_task.run()
+        for task_id in self.dag.travers():
+            task = self.tasks[task_id]
+            if task.pending:
+                task.run()
+            else:
+                print(f"task {task} already complete")

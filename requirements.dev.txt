@@ -1,4 +1,3 @@
 pytest
 codecov
-pytest-asyncio
 pytest-cov

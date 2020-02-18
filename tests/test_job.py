@@ -1,4 +1,5 @@
-import asyncio
+import time
+
 import pytest
 
 from scheduler.job import Job
@@ -6,35 +7,34 @@ from scheduler.task import Task
 from scheduler.dag import CyclicDependenceError
 
 
-async def foo():
-    await asyncio.sleep(1)
+def foo():
+    time.sleep(1)
     print("call", "foo")
 
 
-async def bar():
+def bar():
     print("call", "bar")
 
 
-async def baz():
+def baz():
     print("call", "baz")
 
 
-async def foobar():
+def foobar():
     print("call", "foobar")
 
 
 @pytest.fixture
-def job(event_loop):
-    job = Job(loop=event_loop)
+def job():
+    job = Job()
     yield job
 
 
-@pytest.mark.asyncio
-async def test_upstream(job, event_loop):
-    foo_task = Task(foo, "foo_task", job, loop=event_loop)
-    bar_task = Task(bar, "bar_task", job, loop=event_loop)
-    baz_task = Task(baz, "baz_task", job, loop=event_loop)
-    foobar_task = Task(foobar, "foobar", job, loop=event_loop)
+def test_upstream(job):
+    foo_task = Task(foo, "foo_task", job)
+    bar_task = Task(bar, "bar_task", job)
+    baz_task = Task(baz, "baz_task", job)
+    foobar_task = Task(foobar, "foobar", job)
 
     bar_task.set_upstream(foo_task)
     baz_task.set_upstream(foo_task)
@@ -45,11 +45,10 @@ async def test_upstream(job, event_loop):
     assert foobar_task.downstream() == set()
 
 
-@pytest.mark.asyncio
-async def test_cyclic_stream(job, event_loop):
-    foo_task = Task(foo, "foo_task", job, loop=event_loop)
-    bar_task = Task(bar, "bar_task", job, loop=event_loop)
-    foobar_task = Task(foobar, "foobar", job, loop=event_loop)
+def test_cyclic_stream(job):
+    foo_task = Task(foo, "foo_task", job)
+    bar_task = Task(bar, "bar_task", job)
+    foobar_task = Task(foobar, "foobar", job)
     foo_task.set_upstream(bar_task)
 
     with pytest.raises(CyclicDependenceError):
@@ -61,21 +60,19 @@ async def test_cyclic_stream(job, event_loop):
         bar_task.set_upstream(foobar_task)
 
 
-@pytest.mark.asyncio
-async def test_add_duplicated_task_id(job, event_loop):
-    Task(foo, "task_id", job, loop=event_loop)
+def test_add_duplicated_task_id(job):
+    Task(foo, "task_id", job)
     with pytest.raises(KeyError):
-        Task(bar, "task_id", job, loop=event_loop)
+        Task(bar, "task_id", job)
 
 
-@pytest.mark.asyncio
-async def test_get_independent(job, event_loop):
+def test_get_independent(job):
     assert job.get_independent() == set()
 
-    foo_task = Task(foo, "foo_task", job, loop=event_loop)
-    bar_task = Task(bar, "bar_task", job, loop=event_loop)
-    baz_task = Task(baz, "baz_task", job, loop=event_loop)
-    foobar_task = Task(foobar, "foobar", job, loop=event_loop)
+    foo_task = Task(foo, "foo_task", job)
+    bar_task = Task(bar, "bar_task", job)
+    baz_task = Task(baz, "baz_task", job)
+    foobar_task = Task(foobar, "foobar", job)
 
     assert job.get_independent() == {foo_task, bar_task, baz_task, foobar_task}
 
