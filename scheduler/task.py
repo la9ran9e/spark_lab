@@ -42,6 +42,13 @@ class Task:
             self.complete()
 
     def set_upstream(self, task):
+        """
+
+        foo_task.set_upstream(bar_task)  # ... --> foo_task -->  bar_task --> ...
+
+        :param task: dependent task
+        :return:
+        """
         self.job.set_upstream(self, task)
 
     def downstream(self):
