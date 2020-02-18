@@ -43,9 +43,10 @@ class Task:
 
     def set_upstream(self, task):
         """
-        >>> foo_task = Task(...)
-        >>> bar_task = Task(...)
-        >>> foo_task.set_upstream(bar_task)  # ... --> foo_task -->  bar_task --> ...
+        Usage:
+            >>> foo_task = Task(...)
+            >>> bar_task = Task(...)
+            >>> foo_task.set_upstream(bar_task)  # ... --> foo_task -->  bar_task --> ...
 
         :param task: dependent task
         :return:
