@@ -38,6 +38,7 @@ class Task:
             self.task()
         except Exception as exc:
             self.fail()
+            raise exc
         else:
             self.complete()
 

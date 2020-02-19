@@ -12,7 +12,7 @@ class Job:
         self.dag.add_node(task.id)
 
     def set_upstream(self, ind_task: Task, dep_task: Task):
-        self.dag.add_edge(ind_task.id, dep_task.id)
+        self.dag.add_edge(dep_task.id, ind_task.id)
 
     def downstream(self, task: Task):
         downstream = self.dag.downstream(task.id)

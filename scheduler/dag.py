@@ -56,3 +56,43 @@ class DAG:
 # print(dag.graph)
 # for i in dag.travers():
 #     print("running now:", i)
+
+#
+# '''
+#     -r00 -       - r01
+#     /   |  \     /   |
+#    /    |   \   /    |
+#   v     v    v v     v
+#  r10   r11   r12    r13
+#   -      |   |      -
+#    \     |   |     /
+#     \    |   |    /
+#      \   |   |   /
+#       \  v   v  /
+#        v  r20  v
+# '''
+#
+# dag = DAG()
+# dag.add_node("r00")
+# dag.add_node("r01")
+# dag.add_node("r10")
+# dag.add_node("r11")
+# dag.add_node("r12")
+# dag.add_node("r13")
+# dag.add_node("r20")
+#
+#
+# dag.add_edge("r20", "r10")
+# dag.add_edge("r20", "r11")
+# dag.add_edge("r20", "r12")
+# dag.add_edge("r20", "r13")
+# dag.add_edge("r10", "r00")
+# dag.add_edge("r11", "r00")
+# dag.add_edge("r12", "r00")
+# dag.add_edge("r12", "r01")
+# dag.add_edge("r13", "r01")
+#
+#
+# print(dag.graph)
+# for i in dag.travers():
+#     print("running now:", i)
