@@ -7,7 +7,7 @@ from datetime import datetime
 from scheduler.job import Job, Unit
 from scheduler.task import Task
 from scheduler.dag import CyclicDependenceError
-from scheduler.utils import to_string
+from scheduler.utils import estimate_next_call
 
 
 def foo():
@@ -108,3 +108,21 @@ def test_schedule_every_minute(job):
     assert job.at_time == 10
     dt = datetime.utcfromtimestamp(job.next_run)
     assert dt.second == 10
+
+
+def test_should_run(job, mocker):
+    job.every().minute.at(second=10)
+    now = time.time()
+    should_run = job.should_run
+    d = now - job.next_run
+    if d > 0:
+        expected = True
+        now += (d + 0.01)
+    else:
+        expected = False
+        now -= (d + 0.01)
+
+    assert should_run is expected
+    # print(now)
+    # mocker.patch("time.time", return_value=now)
+    # assert job.should_run is not expected
