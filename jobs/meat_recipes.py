@@ -1,3 +1,5 @@
+import logging
+
 from datetime import timedelta
 from http import HTTPStatus
 
@@ -11,6 +13,8 @@ from pyspark.sql.types import StringType
 import settings
 from meat_ingredients import EXPRESSIONS
 from scheduler import Job, Task
+
+logger = logging.getLogger(__name__)
 
 spark = SparkSession.builder.master("local[*]").appName(__name__).getOrCreate()
 file_name = "/tmp/recipes.json"
@@ -30,9 +34,6 @@ def parse_duration(raw_duration):
 
 
 def _complexity(prep_time, cook_time):
-    with open("/tmp/log.log", 'a') as log:
-        print(prep_time, cook_time, file=log)
-
     prep_time = parse_duration(prep_time)
     cook_time = parse_duration(cook_time)
     if not all((prep_time, cook_time)):
@@ -50,27 +51,30 @@ complexity = udf(_complexity, StringType())
 
 
 def retrieve_recipes():
-    print("retrieve_recipes")
+    logger.info("Start recipes retrieving")
     res = requests.get(url)
     if res.status_code != HTTPStatus.OK:
         raise Exception(f"Bad status code: {res.status_code}")
     with open(file_name, "wb") as f:
         f.write(res.content)
+    logger.info(f"Finished recipes retrieving. Content length={len(res.content)}. Saved in {file_name}.")
     return file_name
 
 
 def save_recipes_orc():
-    print("save_recipes_orc")
+    logger.info("Start recipes saving as ORC")
     recipes = spark.read.json(file_name)
     recipes.write.format("orc").save(orc_path, mode="overwrite")
+    logger.info(f"Finished recipes saving as ORC. DataFrame length={recipes.count()}. Saved in {orc_path}")
 
 
 def retrieve_meat_recipes():
+    logger.info("Start meat recipes retrieving")
     recipes = spark.read.format("orc").load(orc_path)
     filtered = recipes[lower(recipes.ingredients).rlike(expr)]
-    print(filtered.count())
     filtered.withColumn("complexity", complexity("prepTime", "cookTime"))\
         .write.format("orc").save(final_orc_path, mode="overwrite")
+    logger.info(f"Finished meat recipes retrieving. DataFrame length={filtered.count()}. Saved in {final_orc_path}")
 
 
 job = Job()

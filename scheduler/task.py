@@ -1,15 +1,25 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class TaskFailedError(Exception):
+    ...
+
+
 class Task:
     COMPLETED = "completed"
     FAILED = "failed"
     PENDING = "pending"
     RUNNING = "running"
 
-    def __init__(self, task, task_id, job):
+    def __init__(self, task, task_id, job, on_failed=None):
         self.task = task
         self.id = task_id
         self.job = job
         self.job.add_task(self)
         self.status = Task.PENDING
+        self.on_failed = on_failed
 
     @property
     def completed(self):
@@ -29,7 +39,7 @@ class Task:
     def complete(self):
         self.status = Task.COMPLETED
 
-    def fail(self):
+    def fail_task(self):
         self.status = Task.FAILED
 
     def run(self):
@@ -37,8 +47,11 @@ class Task:
         try:
             self.task()
         except Exception as exc:
-            self.fail()
-            raise exc
+            logger.error(f"Task {self} failed:", exc_info=exc)
+            self.fail_task()
+            if self.on_failed:
+                self.on_failed()
+            raise TaskFailedError(exc)
         else:
             self.complete()
 

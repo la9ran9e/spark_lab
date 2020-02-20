@@ -1,4 +1,5 @@
 import datetime
+import logging
 import time
 
 from .task import Task
@@ -7,8 +8,12 @@ from .utils import estimate_next_call, from_time
 from .typing import Unit
 
 
+logger = logging.getLogger(__name__)
+
+
 class Job:
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self.tasks = dict()
         self.dag = DAG()
         self.interval = 0
@@ -32,15 +37,16 @@ class Job:
         return set(t for t in self.tasks.values() if t.id in independent)
 
     def run(self):
-        print(self.dag.graph)
         self.last_run = time.time()
-        for task_id in self.dag.travers():
-            task = self.tasks[task_id]
-            if task.pending:
-                task.run()
-            else:
-                print(f"task {task} already complete")
-        self.reset_tasks()
+        try:
+            for task_id in self.dag.travers():
+                task = self.tasks[task_id]
+                if task.pending:
+                    task.run()
+                else:
+                    print(f"task {task} already complete")
+        finally:
+            self.reset_tasks()
 
     def reset_tasks(self):
         for task in self.tasks.values():
@@ -79,3 +85,6 @@ class Job:
             return False
 
         return time.time() > next_run
+
+    def __repr__(self):
+        return f"<Job name={self.name!r}>"

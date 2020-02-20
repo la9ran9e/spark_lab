@@ -1,7 +1,11 @@
+import logging
 import time
 
 from .job import Job
+from .task import TaskFailedError
 from .utils import estimate_next_call, to_string
+
+logger = logging.getLogger(__name__)
 
 
 class Scheduler:
@@ -16,9 +20,9 @@ class Scheduler:
     def run(self, delay=1):
         while True:
             t = time.time()
-            print(f"Now is {to_string(t)}")
+            logger.debug(f"Now is {to_string(t)}")
             call_time = estimate_next_call(t, delay)
-            print(f"Call time {to_string(call_time)}")
+            logger.debug(f"Call time {to_string(call_time)}")
             time.sleep(call_time - t)
             self.run_pending()
 
@@ -28,4 +32,7 @@ class Scheduler:
                 self.run_job(job)
 
     def run_job(self, job: Job):
-        job.run()
+        try:
+            job.run()
+        except TaskFailedError:
+            logger.error(f"Job {job} stream interrupted")

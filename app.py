@@ -1,7 +1,11 @@
+import logging.config
+
 from scheduler import Scheduler
 
-from meat_recipes import job as meat_recipes
+from jobs.meat_recipes import job as meat_recipes
 
+
+logging.config.fileConfig('logging.conf')
 
 sched = Scheduler()
 
