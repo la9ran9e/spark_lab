@@ -2,9 +2,12 @@ import time
 
 import pytest
 
-from scheduler.job import Job
+from datetime import datetime
+
+from scheduler.job import Job, Unit
 from scheduler.task import Task
 from scheduler.dag import CyclicDependenceError
+from scheduler.utils import to_string
 
 
 def foo():
@@ -87,3 +90,13 @@ def test_get_independent(job):
 
     bar_task.set_upstream(baz_task)
     assert job.get_independent() == {baz_task}
+
+
+def test_schedule(job):
+    job.every(2).hour.at("3:15")
+    assert job.unit == Unit.HOUR
+    assert job.at_time == 3 * 60 + 15
+    dt = datetime.utcfromtimestamp(job.next_run)
+    assert dt.minute == 3
+    assert dt.second == 15
+    assert dt.hour % 2 == 0

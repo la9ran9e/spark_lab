@@ -1,11 +1,31 @@
+import time
+
 from .task import Task
 from .dag import DAG
+from .utils import estimate_next_call, from_string
+
+
+class Unit:
+    MINUTE = "minute"
+    HOUR = "hour"
+
+    SECONDS = {
+        MINUTE: 60,
+        HOUR: 3600,
+    }
+
+    @classmethod
+    def seconds(cls, unit):
+        return cls.SECONDS[unit]
 
 
 class Job:
     def __init__(self):
         self.tasks = dict()
         self.dag = DAG()
+        self.interval = 0
+        self.unit = None
+        self.at_time = None
 
     def add_task(self, task: Task):
         self.tasks[task.id] = task
@@ -30,3 +50,35 @@ class Job:
                 task.run()
             else:
                 print(f"task {task} already complete")
+
+    def every(self, interval=1):
+        self.interval = interval
+        return self
+
+    @property
+    def minute(self):
+        self.unit = Unit.MINUTE
+        return self
+
+    @property
+    def hour(self):
+        self.unit = Unit.HOUR
+        return self
+
+    @property
+    def day(self):
+        raise NotImplementedError()
+
+    def at(self, str_time):
+        if self.unit == Unit.MINUTE:
+            self.at_time = int(str_time)
+        elif self.unit == Unit.HOUR:
+            self.at_time = from_string(str_time)
+
+    @property
+    def next_run(self):
+        return estimate_next_call(time.time(), self.interval * Unit.seconds(self.unit)) + self.at_time
+
+    @property
+    def should_run(self):
+        return time.time() > self.next_run
