@@ -70,10 +70,12 @@ def retrieve_meat_recipes():
     filtered = recipes[lower(recipes.ingredients).rlike(expr)]
     print(filtered.count())
     filtered.withColumn("complexity", complexity("prepTime", "cookTime"))\
-        .write.format("orc").save(final_orc_path)
+        .write.format("orc").save(final_orc_path, mode="overwrite")
 
 
 job = Job()
+job.every().minute.at(second=10)
+
 retrieve_recipes_task = Task(retrieve_recipes, "retrieve_recipes", job)
 save_recipes_orc_task = Task(save_recipes_orc, "save_recipes_orc", job)
 retrieve_meat_recipes_task = Task(retrieve_meat_recipes, "retrieve_meat_recipes", job)

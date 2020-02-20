@@ -1,22 +1,10 @@
+import datetime
 import time
 
 from .task import Task
 from .dag import DAG
-from .utils import estimate_next_call, from_string
-
-
-class Unit:
-    MINUTE = "minute"
-    HOUR = "hour"
-
-    SECONDS = {
-        MINUTE: 60,
-        HOUR: 3600,
-    }
-
-    @classmethod
-    def seconds(cls, unit):
-        return cls.SECONDS[unit]
+from .utils import estimate_next_call, from_time
+from .typing import Unit
 
 
 class Job:
@@ -26,6 +14,7 @@ class Job:
         self.interval = 0
         self.unit = None
         self.at_time = None
+        self.last_run = None
 
     def add_task(self, task: Task):
         self.tasks[task.id] = task
@@ -44,12 +33,18 @@ class Job:
 
     def run(self):
         print(self.dag.graph)
+        self.last_run = time.time()
         for task_id in self.dag.travers():
             task = self.tasks[task_id]
             if task.pending:
                 task.run()
             else:
                 print(f"task {task} already complete")
+        self.reset_tasks()
+
+    def reset_tasks(self):
+        for task in self.tasks.values():
+            task.reset()
 
     def every(self, interval=1):
         self.interval = interval
@@ -69,16 +64,18 @@ class Job:
     def day(self):
         raise NotImplementedError()
 
-    def at(self, str_time):
-        if self.unit == Unit.MINUTE:
-            self.at_time = int(str_time)
-        elif self.unit == Unit.HOUR:
-            self.at_time = from_string(str_time)
+    def at(self, **kwargs):
+        t = datetime.time(**kwargs)
+        self.at_time = from_time(t)
 
     @property
     def next_run(self):
-        return estimate_next_call(time.time(), self.interval * Unit.seconds(self.unit)) + self.at_time
+        return estimate_next_call(time.time(), self.interval * Unit.seconds(self.unit)) + self.at_time - self.interval * Unit.seconds(self.unit)
 
     @property
     def should_run(self):
-        return time.time() > self.next_run
+        next_run = self.next_run
+        if self.last_run and self.last_run > next_run:
+            return False
+
+        return time.time() > next_run

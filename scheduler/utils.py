@@ -1,4 +1,6 @@
-from datetime import datetime
+from datetime import datetime, time
+
+from .typing import Unit
 
 
 def estimate_next_call(t, interval):
@@ -11,7 +13,8 @@ def to_string(t):
 
 def from_string(str_time, pattern='%M:%S'):
     t = datetime.strptime(str_time, pattern).time()
-    return t.hour * 3600 + t.minute * 60 + t.second
+    return from_time(t)
 
 
-print(from_string("3:15"))
+def from_time(t: time):
+    return t.hour * Unit.seconds(Unit.HOUR) + t.minute * Unit.seconds(Unit.MINUTE) + t.second

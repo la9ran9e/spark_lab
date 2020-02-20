@@ -93,10 +93,18 @@ def test_get_independent(job):
 
 
 def test_schedule(job):
-    job.every(2).hour.at("3:15")
+    job.every(2).hour.at(minute=3, second=15)
     assert job.unit == Unit.HOUR
     assert job.at_time == 3 * 60 + 15
     dt = datetime.utcfromtimestamp(job.next_run)
     assert dt.minute == 3
     assert dt.second == 15
     assert dt.hour % 2 == 0
+
+
+def test_schedule_every_minute(job):
+    job.every().minute.at(second=10)
+    assert job.unit == Unit.MINUTE
+    assert job.at_time == 10
+    dt = datetime.utcfromtimestamp(job.next_run)
+    assert dt.second == 10

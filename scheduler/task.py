@@ -42,6 +42,9 @@ class Task:
         else:
             self.complete()
 
+    def reset(self):
+        self.status = Task.PENDING
+
     def set_upstream(self, task):
         """
         Usage:
