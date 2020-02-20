@@ -43,9 +43,9 @@ def test_upstream(job):
     foo_task.set_upstream(baz_task)
     foobar_task.set_upstream(foo_task)
 
-    assert foo_task.downstream() == {foobar_task}
-    assert bar_task.downstream() == {foo_task, foobar_task}
-    assert foobar_task.downstream() == set()
+    assert foo_task.upstream == {foobar_task}
+    assert bar_task.upstream == {foo_task, foobar_task}
+    assert foobar_task.upstream == set()
 
 
 def test_cyclic_stream(job):

@@ -57,8 +57,9 @@ class Task:
         """
         self.job.set_upstream(self, task)
 
-    def downstream(self):
-        return self.job.downstream(self)
+    @property
+    def upstream(self):
+        return self.job.upstream(self)
 
     def __repr__(self):
         return f"<Task id={self.id!r} status={self.status}>"

@@ -16,7 +16,7 @@ class DAG:
             raise KeyError(f"{ind_node!r} not exists")
         if dep_node not in self.graph:
             raise KeyError(f"{dep_node!r} not exists")
-        if ind_node in self.downstream(dep_node):
+        if ind_node in self.upstream(dep_node):
             raise CyclicDependenceError()
         self.graph[ind_node].add(dep_node)
 
@@ -37,7 +37,7 @@ class DAG:
     def get_dependent(self):
         return set(node for dependent in self.graph.values() for node in dependent)
 
-    def downstream(self, node):
+    def upstream(self, node):
         nodes = self.graph[node]
         return set(node for node in self._do_travers(nodes))
 

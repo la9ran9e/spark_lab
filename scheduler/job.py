@@ -23,9 +23,9 @@ class Job:
     def set_upstream(self, ind_task: Task, dep_task: Task):
         self.dag.add_edge(dep_task.id, ind_task.id)
 
-    def downstream(self, task: Task):
-        downstream = self.dag.downstream(task.id)
-        return set(t for t in self.tasks.values() if t.id in downstream)
+    def upstream(self, task: Task):
+        upstream = self.dag.upstream(task.id)
+        return set(t for t in self.tasks.values() if t.id in upstream)
 
     def get_independent(self):
         independent = self.dag.get_independent()
