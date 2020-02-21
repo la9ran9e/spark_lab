@@ -8,7 +8,6 @@ from unittest.mock import PropertyMock
 from scheduler.job import Job, Unit
 from scheduler.task import Task
 from scheduler.dag import CyclicDependenceError
-from scheduler.utils import estimate_next_call
 
 
 def foo():
@@ -130,3 +129,21 @@ def test_should_run(job, mocker):
 
     mocker.patch("time.time", return_value=now)
     assert job.should_run is not expected
+
+
+def test_reset_tasks(job):
+    Task(foo, "foo_task", job)
+    Task(bar, "bar_task", job)
+    Task(baz, "baz_task", job)
+    Task(foobar, "foobar", job)
+
+    for task in job.tasks.values():
+        task.complete()
+
+    for task in job.tasks.values():
+        assert task.completed is True
+
+    job.reset_tasks()
+
+    for task in job.tasks.values():
+        assert task.pending is True
