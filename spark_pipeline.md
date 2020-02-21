@@ -8,6 +8,8 @@ transforming and loading this.
 Data is a massive of JSON-formatted cooking recipes. We need extract it from source, 
 retrieve all recipes containing meat, estimate cooking complexity and load result to disc.
 
+Pipeline starts every minute at 10th second.
+
 ### Content:
 * [Source code of job](jobs/meat_recipes.py)
 * [Scheduler application source code](app.py)
