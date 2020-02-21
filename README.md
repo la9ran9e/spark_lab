@@ -1,3 +1,5 @@
+![Image](icon.png?raw=true)
+
 # spark_lab
 
 [![Build Status](https://travis-ci.com/la9ran9e/spark_lab.svg?branch=master)](https://travis-ci.com/la9ran9e/spark_lab)
