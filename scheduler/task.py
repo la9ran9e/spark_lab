@@ -29,9 +29,9 @@ class Task:
     def pending(self):
         return self.status == Task.PENDING
 
-    @property
-    def running(self):
-        return self.status == Task.RUNNING
+    # @property
+    # def running(self):
+    #     return self.status == Task.RUNNING
 
     def set_running(self):
         self.status = Task.RUNNING
@@ -50,7 +50,7 @@ class Task:
             logger.error(f"Task {self} failed:", exc_info=exc)
             self.fail_task()
             if self.on_failed:
-                self.on_failed()
+                self.on_failed(self)
             raise TaskFailedError(exc)
         else:
             self.complete()
