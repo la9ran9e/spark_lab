@@ -6,7 +6,7 @@
 
 ## Example projects
 
-* [Spark pipeline](spark_pipeline.md?raw=true).
+* [Spark pipeline](spark_pipeline.md).
 
 
 ## Scheduler

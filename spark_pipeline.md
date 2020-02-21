@@ -9,8 +9,8 @@ Data is a massive of JSON-formatted cooking recipes. We need extract it from sou
 retrieve all recipes containing meat, estimate cooking complexity and load result to disc.
 
 ### Content:
-* [Source code of job](jobs/meat_recipes.py?raw=true)
-* [Scheduler application source code](app.py?raw=true)
+* [Source code of job](jobs/meat_recipes.py)
+* [Scheduler application source code](app.py)
 
 ### Build
 
