@@ -184,6 +184,7 @@ def test_run(job):
     foo_task.set_upstream(bar_task)
     foo_task.set_upstream(baz_task)
     foobar_task.set_upstream(foo_task)
+    bar_task.set_upstream(baz_task)
 
     job.run()
 
