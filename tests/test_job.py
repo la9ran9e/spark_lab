@@ -3,6 +3,7 @@ import time
 import pytest
 
 from datetime import datetime
+from unittest.mock import PropertyMock
 
 from scheduler.job import Job, Unit
 from scheduler.task import Task
@@ -113,16 +114,19 @@ def test_schedule_every_minute(job):
 def test_should_run(job, mocker):
     job.every().minute.at(second=10)
     now = time.time()
-    should_run = job.should_run
+    next_run = job.next_run
+    mocker.patch("scheduler.Job.next_run", new_callable=PropertyMock, return_value=next_run)
+    mocker.patch("time.time", return_value=now)
+
     d = now - job.next_run
     if d > 0:
         expected = True
-        now += (d + 0.01)
+        now -= (d + 0.01)
     else:
         expected = False
-        now -= (d + 0.01)
+        now -= (d - 0.01)
 
-    assert should_run is expected
-    # print(now)
-    # mocker.patch("time.time", return_value=now)
-    # assert job.should_run is not expected
+    assert job.should_run is expected
+
+    mocker.patch("time.time", return_value=now)
+    assert job.should_run is not expected

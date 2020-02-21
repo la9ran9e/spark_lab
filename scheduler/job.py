@@ -83,7 +83,6 @@ class Job:
         next_run = self.next_run
         if self.last_run and self.last_run > next_run:
             return False
-
         return time.time() > next_run
 
     def __repr__(self):
