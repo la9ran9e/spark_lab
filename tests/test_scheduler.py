@@ -4,6 +4,7 @@ import pytest
 
 from unittest.mock import PropertyMock
 from scheduler import Scheduler, Job, Task
+from scheduler.scheduler import HeartbeatDetails
 
 
 seq = []
@@ -78,3 +79,18 @@ def test_on_job_failed(scheduler):
     scheduler.run_job(j)
 
     assert len(failed_seq) == 1
+
+
+def test_heartbeat(scheduler):
+    heartbeats_seq = []
+
+    def on_heartbeat(details: HeartbeatDetails):
+        heartbeats_seq.append(details.call_time)
+        if len(heartbeats_seq) == 3:
+            scheduler.should_stop = True
+
+    scheduler.on_heartbeat = on_heartbeat
+    scheduler.run(delay=1)
+    assert len(heartbeats_seq) == 3
+    for call_time in heartbeats_seq:
+        assert call_time % 1 == 0.0
