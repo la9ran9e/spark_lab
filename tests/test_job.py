@@ -10,20 +10,27 @@ from scheduler.task import Task
 from scheduler.dag import CyclicDependenceError
 
 
+seq = []
+
+
 def foo():
     time.sleep(1)
+    seq.append("foo")
     print("call", "foo")
 
 
 def bar():
+    seq.append("bar")
     print("call", "bar")
 
 
 def baz():
+    seq.append("baz")
     print("call", "baz")
 
 
 def foobar():
+    seq.append("foobar")
     print("call", "foobar")
 
 
@@ -31,6 +38,12 @@ def foobar():
 def job():
     job = Job()
     yield job
+
+
+@pytest.fixture
+def cleanup_seq():
+    yield
+    seq.clear()
 
 
 def test_upstream(job):
@@ -159,3 +172,19 @@ def test_reset_tasks(job):
 
     for task in job.tasks.values():
         assert task.pending is True
+
+
+@pytest.mark.usefixtures("cleanup_seq")
+def test_run(job):
+    foo_task = Task(foo, "foo_task", job)
+    bar_task = Task(bar, "bar_task", job)
+    baz_task = Task(baz, "baz_task", job)
+    foobar_task = Task(foobar, "foobar", job)
+
+    foo_task.set_upstream(bar_task)
+    foo_task.set_upstream(baz_task)
+    foobar_task.set_upstream(foo_task)
+
+    job.run()
+
+    assert seq == ["foobar", "foo", "bar", "baz"]
