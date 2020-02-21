@@ -43,8 +43,6 @@ class Job:
                 task = self.tasks[task_id]
                 if task.pending:
                     task.run()
-                else:
-                    print(f"task {task} already complete")
         finally:
             self.reset_tasks()
 

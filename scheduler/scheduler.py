@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class Scheduler:
-    def __init__(self):
+    def __init__(self, on_job_failed=None):
         self.jobs = set()
+        self.on_job_failed = on_job_failed
 
     def register(self, job: Job):
         if job in self.jobs:
@@ -36,3 +37,5 @@ class Scheduler:
             job.run()
         except TaskFailedError:
             logger.error(f"Job {job} stream interrupted")
+            if self.on_job_failed:
+                self.on_job_failed(job)

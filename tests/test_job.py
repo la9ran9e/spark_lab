@@ -16,22 +16,18 @@ seq = []
 def foo():
     time.sleep(1)
     seq.append("foo")
-    print("call", "foo")
 
 
 def bar():
     seq.append("bar")
-    print("call", "bar")
 
 
 def baz():
     seq.append("baz")
-    print("call", "baz")
 
 
 def foobar():
     seq.append("foobar")
-    print("call", "foobar")
 
 
 @pytest.fixture
@@ -189,3 +185,43 @@ def test_run(job):
     job.run()
 
     assert seq == ["foobar", "foo", "bar", "baz"]
+
+
+@pytest.mark.usefixtures("cleanup_seq")
+def test_complex_case(job):
+    # """
+    #     -r00 -       - r01
+    #     /   |  \     /   |
+    #    /    |   \   /    |
+    #   v     v    v v     v
+    #  r10   r11   r12    r13
+    #   -      |   |      -
+    #    \     |   |     /
+    #     \    |   |    /
+    #      \   |   |   /
+    #       \  v   v  /
+    #        v  r20  v
+    # """
+    r00 = Task(lambda: seq.append("r00"), "r00", job)
+    r01 = Task(lambda: seq.append("r01"), "r01", job)
+    r10 = Task(lambda: seq.append("r10"), "r10", job)
+    r11 = Task(lambda: seq.append("r11"), "r11", job)
+    r12 = Task(lambda: seq.append("r12"), "r12", job)
+    r13 = Task(lambda: seq.append("r13"), "r13", job)
+    r20 = Task(lambda: seq.append("r20"), "r20", job)
+
+    r00.set_upstream(r10)
+    r00.set_upstream(r11)
+    r00.set_upstream(r12)
+    r01.set_upstream(r12)
+    r01.set_upstream(r13)
+    r10.set_upstream(r20)
+    r11.set_upstream(r20)
+    r12.set_upstream(r20)
+    r13.set_upstream(r20)
+
+    assert r20.upstream == {r10, r11, r12, r13, r00, r01}
+    assert r10.upstream == {r00}
+    assert r11.upstream == {r00}
+    assert r12.upstream == {r00, r01}
+    assert r13.upstream == {r01}
