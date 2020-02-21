@@ -1,3 +1,4 @@
+import os
 import logging
 
 from datetime import timedelta
@@ -17,9 +18,9 @@ from scheduler import Job, Task
 logger = logging.getLogger(__name__)
 
 spark = SparkSession.builder.master("local[*]").appName(__name__).getOrCreate()
-file_name = "/tmp/recipes.json"
-orc_path = "/tmp/recipes.orc"
-final_orc_path = "/tmp/meat_recipes.orc"
+file_name = os.path.join(settings.WORKDIR, "recipes.json")
+orc_path = os.path.join(settings.WORKDIR, "recipes.orc")
+final_orc_path = os.path.join(settings.WORKDIR, "meat_recipes.orc")
 url = settings.RECIPES_URL
 expr = "|".join(EXPRESSIONS)
 
