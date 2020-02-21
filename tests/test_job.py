@@ -131,6 +131,18 @@ def test_should_run(job, mocker):
     assert job.should_run is not expected
 
 
+def test_should_run_with_last_update(job, mocker):
+    job.every().minute.at(second=10)
+    now = time.time()
+    next_run = job.next_run
+    job.last_run = next_run + 1.0
+
+    mocker.patch("scheduler.Job.next_run", new_callable=PropertyMock, return_value=next_run)
+    mocker.patch("time.time", return_value=now)
+
+    assert job.should_run is False
+
+
 def test_reset_tasks(job):
     Task(foo, "foo_task", job)
     Task(bar, "bar_task", job)
