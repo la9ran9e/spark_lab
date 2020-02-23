@@ -16,6 +16,12 @@ Pipeline starts every minute at 10th second.
 
 ### Build
 
+To install requirements call next command:
+
+```bash
+python3.6 -m pip install -r requirements.txt
+```
+
 Before running app prepare `.env` file in project root directory with next environment variables:
 
 ```bash
