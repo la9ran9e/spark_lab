@@ -74,7 +74,7 @@ job.run()
 from scheduler import Scheduler
 
 
-job.every(2).minute.at(second=30) # run this job in every even minute at 30th second
+job.every(2).minute.at(second=30) # run this job every even minute at 30th second
 
 scheduler = Scheduler()
 scheduler.register(job)
